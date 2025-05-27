@@ -75,10 +75,45 @@ zones:
 python3 bunny-ddns.py
 ```
 
-**Daemon Mode** (continuous monitoring):
-```bash
-python3 bunny-ddns.py --daemon
-```
+## 🛠️ Automated Setup with Systemd
+
+To run the updater automatically on a schedule, use the provided setup script to configure a systemd service and timer.
+
+1. **Run the setup script**:
+   ```bash
+   chmod +x setup.sh
+   ./setup.sh
+   ```
+
+2. **Follow the prompts**:
+   - The script will ask for your preferred update interval (in minutes, e.g., `5` for every 5 minutes).
+   - It will create and enable a systemd service and timer to run the updater automatically.
+
+3. **Verify setup**:
+   ```bash
+   sudo systemctl status bunny-ddns.timer
+   ```
+
+4. **Useful commands**:
+   ```bash
+   # Check timer status
+   sudo systemctl status bunny-ddns.timer
+
+   # Check last run
+   sudo systemctl status bunny-ddns.service
+
+   # View logs
+   sudo journalctl -u bunny-ddns.service -n 20
+
+   # Run manually now
+   sudo systemctl start bunny-ddns.service
+
+   # Stop automatic runs
+   sudo systemctl stop bunny-ddns.timer
+
+   # Disable service
+   sudo systemctl disable bunny-ddns.timer
+   ```
 
 ## 📋 Configuration Reference
 
@@ -101,10 +136,6 @@ logging:
   level: "INFO"         # DEBUG, INFO, WARNING, ERROR
   file: true            # Log to ddns.log file
   console: false        # Also log to console (useful for debugging)
-
-# Daemon Settings
-daemon:
-  interval: 1800        # Check interval in seconds (1800 = 30 minutes)
 
 # DNS Zones Configuration
 zones:
@@ -152,62 +183,20 @@ zones:
 | `logging.level` | Log level (DEBUG/INFO/WARNING/ERROR) | `INFO` |
 | `logging.file` | Log to file | `true` |
 | `logging.console` | Log to console | `false` |
-| `daemon.interval` | Update interval in seconds | `1800` (30 min) |
 
-## 🔧 Advanced Usage
+## 🔧 Alternative: Cron Job Setup
 
-### Running as a System Service
+For systems without systemd, you can use a cron job to run the updater periodically.
 
-Create a systemd service for automatic startup:
-
-1. **Create service file**:
+1. **Edit crontab**:
    ```bash
-   sudo nano /etc/systemd/system/bunny-ddns.service
+   crontab -e
    ```
 
-2. **Add service configuration**:
-   ```ini
-   [Unit]
-   Description=Bunny.net Dynamic DNS Updater
-   After=network.target
-   Wants=network.target
-
-   [Service]
-   Type=simple
-   User=pi
-   WorkingDirectory=/home/pi/bunny-ddns
-   ExecStart=/usr/bin/python3 /home/pi/bunny-ddns/bunny_ddns_advanced.py --daemon
-   Restart=always
-   RestartSec=30
-
-   [Install]
-   WantedBy=multi-user.target
-   ```
-
-3. **Enable and start service**:
+2. **Add a cron job** (e.g., run every 5 minutes):
    ```bash
-   sudo systemctl daemon-reload
-   sudo systemctl enable bunny-ddns.service
-   sudo systemctl start bunny-ddns.service
+   */5 * * * * cd /home/pi/bunny-ddns && /usr/bin/python3 bunny-ddns.py >> /var/log/bunny-ddns-cron.log 2>&1
    ```
-
-4. **Check service status**:
-   ```bash
-   sudo systemctl status bunny-ddns.service
-   sudo journalctl -u bunny-ddns.service -f
-   ```
-
-### Cron Job Setup
-
-For systems without systemd, use cron:
-
-```bash
-# Edit crontab
-crontab -e
-
-# Add line to run every 30 minutes
-*/30 * * * * cd /home/pi/bunny-ddns && /usr/bin/python3 bunny_ddns_advanced.py >> /var/log/bunny-ddns-cron.log 2>&1
-```
 
 ## 🛠️ Troubleshooting
 
@@ -263,10 +252,11 @@ logging:
 
 ```
 bunny-ddns/
-├── bunny_ddns_advanced.py    # Main script
-├── config.yaml               # Configuration file
-├── config.yaml.example       # Example configuration
-├── requirements.txt          # Python dependencies
+├── bunny-ddns.py            # Main script
+├── config.yaml              # Configuration file
+├── config.yaml.example      # Example configuration
+├── requirements.txt         # Python dependencies
+├── setup.sh                 # Setup script for systemd service
 ├── ddns.log                 # Log file (created automatically)
 ├── README.md                # This documentation
 └── LICENSE                  # MIT License
