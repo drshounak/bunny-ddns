@@ -1,0 +1,63 @@
+# Bunny.net DDNS Configuration Example
+# Copy this file to config.yaml and customize for your setup
+
+api_key: "your-bunny-api-key-here"  # Replace with your Bunny.net API key
+
+# IP Detection Settings
+ip_detection:
+  ipv4:
+    enabled: true
+  ipv6:
+    enabled: true    # Set to false if you don't have IPv6
+
+# Logging Configuration
+logging:
+  enabled: true      # Set to false to disable all logging
+  level: "INFO"     # DEBUG, INFO, WARNING, ERROR
+  file: true        # Log to file (ddns.log)
+  console: false    # Log to console (useful for debugging)
+
+# Daemon Settings (for --daemon mode)
+daemon:
+  interval: 1800    # Check interval in seconds (1800 = 30 minutes)
+
+# DNS Zones and Records
+zones:
+  # Example Zone 1
+  - zone_id: "your-zone-id-here"  # Get this from Bunny.net DNS panel
+    domain: "example.com"
+    records:
+      # Home server - both IPv4 and IPv6
+      - subdomain: "home"
+        types:
+          - type: "A"       # IPv4
+            ttl: 300
+          - type: "AAAA"    # IPv6
+            ttl: 300
+      
+      # Root domain - IPv4 only
+      - subdomain: ""       # Empty = root domain (example.com)
+        types:
+          - type: "A"
+            ttl: 300
+      
+      # Media server - custom TTL
+      - subdomain: "media"
+        types:
+          - type: "A"
+            ttl: 600        # 10 minutes
+          - type: "AAAA"
+            ttl: 600
+
+  # Example Zone 2 (optional - you can have multiple domains)
+  - zone_id: "another-zone-id"
+    domain: "mydomain.net"
+    records:
+      - subdomain: "www"
+        types:
+          - type: "A"
+            ttl: 300
+      - subdomain: "api"
+        types:
+          - type: "AAAA"    # IPv6 only
+            ttl: 300
