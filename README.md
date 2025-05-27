@@ -72,12 +72,12 @@ zones:
 
 **Single Update** (run once and exit):
 ```bash
-python3 bunny_ddns_advanced.py
+python3 bunny-ddns.py
 ```
 
 **Daemon Mode** (continuous monitoring):
 ```bash
-python3 bunny_ddns_advanced.py --daemon
+python3 bunny-ddns.py --daemon
 ```
 
 ## 📋 Configuration Reference
